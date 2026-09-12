@@ -33,7 +33,17 @@ function Navbar() {
             Students
           </NavLink>
 
+          <NavLink
+            to="/add-student"
+            className={({ isActive }) =>
+              isActive ? "active add-active" : "add-link"
+            }
+          >
+            + Add Student
+          </NavLink>
+
         </nav>
+
       </div>
     </header>
   );
