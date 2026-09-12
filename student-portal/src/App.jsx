@@ -10,115 +10,97 @@ import AddStudent from "./pages/AddStudent";
 import StudentDetails from "./pages/StudentDetails";
 
 function App() {
-  // =========================
+  // =====================================================
   // STUDENT STATE
-  // =========================
+  // =====================================================
 
   const [students, setStudents] = useState([]);
-
   const [loading, setLoading] = useState(true);
-
   const [error, setError] = useState("");
 
-
-  // =========================
+  // =====================================================
   // GET STUDENTS FROM API
-  // =========================
+  // =====================================================
 
   useEffect(() => {
-    axios
-      .get("https://jsonplaceholder.typicode.com/users")
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-      .then((response) => {
+        const response = await axios.get(
+          "https://jsonplaceholder.typicode.com/users"
+        );
+
         setStudents(response.data);
-        setLoading(false);
-      })
-
-      .catch((error) => {
+      } catch (error) {
         console.error("API Error:", error);
 
         setError(
-          "Failed to load student data."
+          "Failed to load student data. Please check your internet connection and try again."
         );
-
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchStudents();
   }, []);
 
-
-  // =========================
+  // =====================================================
   // ADD STUDENT
-  // =========================
+  // =====================================================
 
   const addStudent = async (studentData) => {
     try {
-
       const response = await axios.post(
         "https://jsonplaceholder.typicode.com/users",
         studentData
       );
 
+      // Get the highest existing student ID
+      const highestId = students.reduce(
+        (maxId, student) =>
+          Math.max(maxId, Number(student.id)),
+        0
+      );
 
-      // JSONPlaceholder returns a fake
-      // ID for the new student.
-      // We create our own ID so it
-      // works correctly in this app.
-
+      // Create the new student
       const newStudent = {
         ...response.data,
-
-        id: students.length + 1,
+        id: highestId + 1,
       };
 
-
-      // Add the new student to the
-      // existing React state.
-
+      // Add the new student to the current list
       setStudents((previousStudents) => [
         ...previousStudents,
         newStudent,
       ]);
 
-
-      // Return the student so that
-      // AddStudent.jsx can navigate
-      // to its details page.
-
+      // Return the new student
+      // so AddStudent.jsx can open the details page
       return newStudent;
-
     } catch (error) {
-
-      console.error(
-        "Add Student Error:",
-        error
-      );
+      console.error("Add Student Error:", error);
 
       throw error;
     }
   };
 
-
-  // =========================
+  // =====================================================
   // APPLICATION
-  // =========================
+  // =====================================================
 
   return (
     <>
       {/* NAVIGATION */}
-
       <Navbar />
 
-
       {/* PAGE ROUTES */}
-
       <main>
-
         <Routes>
 
-          {/* =====================
-              HOME PAGE
-          ====================== */}
-
+          {/* HOME PAGE */}
           <Route
             path="/"
             element={
@@ -128,11 +110,7 @@ function App() {
             }
           />
 
-
-          {/* =====================
-              STUDENTS PAGE
-          ====================== */}
-
+          {/* STUDENTS PAGE */}
           <Route
             path="/students"
             element={
@@ -144,11 +122,7 @@ function App() {
             }
           />
 
-
-          {/* =====================
-              ADD STUDENT PAGE
-          ====================== */}
-
+          {/* ADD STUDENT PAGE */}
           <Route
             path="/add-student"
             element={
@@ -158,11 +132,7 @@ function App() {
             }
           />
 
-
-          {/* =====================
-              STUDENT DETAILS PAGE
-          ====================== */}
-
+          {/* STUDENT DETAILS PAGE */}
           <Route
             path="/students/:id"
             element={
@@ -173,7 +143,6 @@ function App() {
           />
 
         </Routes>
-
       </main>
     </>
   );
